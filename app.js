@@ -318,7 +318,8 @@ document.querySelectorAll('.lang-btn').forEach((button) => {
   });
 });
 
-document.querySelector('#year').textContent = new Date().getFullYear();
+const yearEl = document.querySelector('#year');
+if (yearEl) yearEl.textContent = new Date().getFullYear();
 
 const appLoader = document.getElementById('app-loader');
 
@@ -327,17 +328,23 @@ if (appLoader) {
   const maxLoaderDelay = 4000;
   const loaderDelay = Math.floor(Math.random() * (maxLoaderDelay - minLoaderDelay + 1)) + minLoaderDelay;
 
-  window.addEventListener('load', () => {
+  let loaderHidden = false;
+  const hideLoader = () => {
+    if (loaderHidden) return;
+    loaderHidden = true;
+    appLoader.classList.add('is-leaving');
     window.setTimeout(() => {
-      appLoader.classList.add('is-leaving');
-      window.setTimeout(() => {
-        appLoader.remove();
-        heroCarouselStarted = true;
-        nextHeroChangeAt = Date.now() + heroSlideDuration;
-        startHeroTimer();
-      }, 700);
-    }, loaderDelay);
-  });
+      appLoader.remove();
+      heroCarouselStarted = true;
+      nextHeroChangeAt = Date.now() + heroSlideDuration;
+      startHeroTimer();
+    }, 700);
+  };
+
+  // Hide after the short delay once the page is usable, without waiting for every image/video.
+  window.setTimeout(hideLoader, loaderDelay);
+  // Safety net: never keep the loader longer than 6 seconds.
+  window.setTimeout(hideLoader, 6000);
 } else {
   window.addEventListener('load', () => {
     heroCarouselStarted = true;
